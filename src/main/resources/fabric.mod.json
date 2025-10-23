@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "elytraboost",
+  "version": "${version}",
+  "name": "ElytraBoost",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/elytraboost/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "dev.ruitenbeek.elytraboost.client.ElytraboostDataGenerator"
+    ],
+    "client": [
+      "dev.ruitenbeek.elytraboost.client.ElytraboostClient"
+    ],
+    "main": [
+      "dev.ruitenbeek.elytraboost.Elytraboost"
+    ]
+  },
+  "mixins": [
+    "elytraboost.mixins.json",
+    {
+      "config": "elytraboost.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
