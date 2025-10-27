@@ -2,24 +2,19 @@ package dev.ruitenbeek.elytraboost.client.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.chunk.WorldChunk;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import static dev.ruitenbeek.elytraboost.client.Utils.canUpdate.canUpdate;
@@ -27,56 +22,94 @@ import static dev.ruitenbeek.elytraboost.client.ElytraboostClient.mc;
 
 public class Render implements modModule {
 
-    private static KeyBinding keyBind;
     private final ArrayList<BlockPos> chestPositions = new ArrayList<>();
+    private final List<BlockEntityType<?>> allowedBlocks = List.of(BlockEntityType.CHEST, BlockEntityType.SHULKER_BOX);
 
     private Render(){
-        keyBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "getAmountBlockEntities",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_L,
-                "ElytraBoost"
-        ));
-
         ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
             chestPositions.addAll(getChestPositionsInChunk(chunk.getPos()));
         });
 
-        WorldRenderEvents.LAST.register(context -> {
-            if (mc.world == null) return;
+        WorldRenderEvents.END.register(context -> {
+            if (!canUpdate()) return;
 
-            MatrixStack matrices = context.matrixStack();
-            VertexConsumerProvider.Immediate vertexConsumers = mc.getBufferBuilders().getEntityVertexConsumers();
+            MatrixStack pose = context.matrixStack();
             float tickDelta = context.tickCounter().getTickDelta(true);
+            Camera camera = context.camera();
+            Tessellator tessellator = Tessellator.getInstance();
 
-            vertexConsumers.draw();
+            assert pose != null;
 
-            RenderSystem.disableDepthTest();
-            RenderSystem.disableCull();
+            pose.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
+            pose.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() - 180f));
 
-            matrices.push();
 
-            double camX = mc.gameRenderer.getCamera().getPos().x;
-            double camY = mc.gameRenderer.getCamera().getPos().y;
-            double camZ = mc.gameRenderer.getCamera().getPos().z;
+            BufferBuilder builder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 
-            matrices.translate(-camX, -camY, -camZ);
+            final int r = 255;
+            final int g = 0;
+            final int b = 0;
+            final int a = 230;
 
             for (BlockPos pos : chestPositions) {
-                BlockEntity be = mc.world.getBlockEntity(pos);
-                if (be != null && be.getType() == BlockEntityType.CHEST) {
-                    matrices.push();
-                    matrices.translate(pos.getX(), pos.getY(), pos.getZ());
-                    mc.getBlockEntityRenderDispatcher().render(be, tickDelta, matrices, vertexConsumers);
-                    matrices.pop();
-                }
+                pose.push();
+
+                final double xOffset = pos.getX() + (0.5 - camera.getPos().x);
+                final double yOffset = pos.getY() + (0.5 - camera.getPos().y);
+                final double zOffset = pos.getZ() + (0.5 - camera.getPos().z);
+                pose.translate(xOffset, yOffset, zOffset);
+                pose.scale(0.5f, 0.5f, 0.5f);
+                MatrixStack.Entry resultMatrix = pose.peek();
+
+                // -Z
+                builder.vertex(resultMatrix, -1, -1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, 1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, 1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, -1, -1).color(r, g, b, a);
+
+                // +Z
+                builder.vertex(resultMatrix, -1, -1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, -1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, 1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, 1, 1).color(r, g, b, a);
+
+                // -Y
+                builder.vertex(resultMatrix, -1, -1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, -1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, -1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, -1, 1).color(r, g, b, a);
+
+                // +Y
+                builder.vertex(resultMatrix, -1, 1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, 1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, 1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, 1, -1).color(r, g, b, a);
+
+                // -X
+                builder.vertex(resultMatrix, -1, -1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, -1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, 1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, -1, 1, -1).color(r, g, b, a);
+
+                // +X
+                builder.vertex(resultMatrix, 1, -1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, 1, -1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, 1, 1).color(r, g, b, a);
+                builder.vertex(resultMatrix, 1, -1, 1).color(r, g, b, a);
+
+                pose.pop();
             }
 
-            matrices.pop();
+            RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+            RenderSystem.setShaderColor(1f,1f,1f, a /255f);
+            RenderSystem.enableBlend();
+            RenderSystem.depthFunc(GL11.GL_ALWAYS);
 
+            BufferRenderer.drawWithGlobalProgram(builder.end());
 
-            RenderSystem.enableCull();
-            RenderSystem.enableDepthTest();
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            RenderSystem.depthFunc(GL11.GL_LEQUAL);
+            RenderSystem.disableBlend();
         });
 
     }
@@ -88,7 +121,7 @@ public class Render implements modModule {
         if (mc.world.isChunkLoaded(chunkPos.x, chunkPos.z)) {
             WorldChunk currentChunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
             for (Map.Entry<BlockPos, BlockEntity> entry : currentChunk.getBlockEntities().entrySet()) {
-                if (entry.getValue().getType() == BlockEntityType.CHEST) {
+                if (allowedBlocks.contains(entry.getValue().getType())) {
                     found.add(entry.getKey());
                 }
             }

@@ -1,6 +1,5 @@
 package dev.ruitenbeek.elytraboost.client;
 
-import dev.ruitenbeek.elytraboost.client.modules.Boost;
 import dev.ruitenbeek.elytraboost.client.modules.LoadModules;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
