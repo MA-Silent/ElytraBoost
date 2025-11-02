@@ -1,4 +1,4 @@
-package dev.ruitenbeek.elytraboost.client.modules;
+package dev.ruitenbeek.elytraboost.client;
 
 import org.reflections.Reflections;
 import java.lang.reflect.Method;

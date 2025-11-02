@@ -1,5 +1,6 @@
 package dev.ruitenbeek.elytraboost.client.modules;
 
+import dev.ruitenbeek.elytraboost.client.modModule;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
@@ -21,13 +22,13 @@ import java.util.Objects;
 import static dev.ruitenbeek.elytraboost.client.ElytraboostClient.*;
 import static dev.ruitenbeek.elytraboost.client.Utils.canUpdate.canUpdate;
 
-public class Boost implements modModule {
+public class ElytraBoost implements modModule {
 
     private static KeyBinding keyBind;
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
     private final int durationInSeconds = 1;
 
-    private Boost() {
+    private ElytraBoost() {
 
         keyBind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Boost",
@@ -72,11 +73,11 @@ public class Boost implements modModule {
         }
     }
 
-    private static Boost INSTANCE;
+    private static ElytraBoost INSTANCE;
 
     public static void init() {
         if (INSTANCE == null) {
-            INSTANCE = new Boost();
+            INSTANCE = new ElytraBoost();
         }
     }
 }

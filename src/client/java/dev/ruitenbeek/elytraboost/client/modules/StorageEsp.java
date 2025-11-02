@@ -1,6 +1,7 @@
 package dev.ruitenbeek.elytraboost.client.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.ruitenbeek.elytraboost.client.modModule;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BlockEntity;
@@ -20,12 +21,13 @@ import java.util.Map;
 import static dev.ruitenbeek.elytraboost.client.Utils.canUpdate.canUpdate;
 import static dev.ruitenbeek.elytraboost.client.ElytraboostClient.mc;
 
-public class Render implements modModule {
+public class StorageEsp implements modModule {
 
     private final ArrayList<BlockPos> chestPositions = new ArrayList<>();
     private final List<BlockEntityType<?>> allowedBlocks = List.of(BlockEntityType.CHEST, BlockEntityType.SHULKER_BOX);
+    public static boolean enabled = true;
 
-    private Render(){
+    private StorageEsp(){
         ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
             chestPositions.addAll(getChestPositionsInChunk(chunk.getPos()));
         });
@@ -105,7 +107,7 @@ public class Render implements modModule {
             RenderSystem.enableBlend();
             RenderSystem.depthFunc(GL11.GL_ALWAYS);
 
-            if(!chestPositions.isEmpty()) BufferRenderer.drawWithGlobalProgram(builder.end());
+            if(!chestPositions.isEmpty() && enabled) BufferRenderer.drawWithGlobalProgram(builder.end());
 
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.depthFunc(GL11.GL_LEQUAL);
@@ -129,11 +131,11 @@ public class Render implements modModule {
         return found;
     }
 
-    private static Render INSTANCE;
+    private static StorageEsp INSTANCE;
 
     public static void init() {
         if (INSTANCE == null) {
-            INSTANCE = new Render();
+            INSTANCE = new StorageEsp();
         }
     }
 }
