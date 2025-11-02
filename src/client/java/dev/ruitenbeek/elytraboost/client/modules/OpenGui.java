@@ -10,7 +10,6 @@ import org.lwjgl.glfw.GLFW;
 
 public class OpenGui implements modModule {
 
-    public static boolean open = false;
     public static KeyBinding keyBind;
 
     private OpenGui() {
@@ -23,11 +22,8 @@ public class OpenGui implements modModule {
         ));
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
-           while (keyBind.wasPressed()) {
-               if(!open){
-                   client.setScreen(Gui.INSTANCE);
-                   open = true;
-               }
+           if (keyBind.wasPressed()) {
+               client.setScreen(Gui.INSTANCE);
            }
         });
 

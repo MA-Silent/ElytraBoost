@@ -102,16 +102,24 @@ public class StorageEsp implements modModule {
                 pose.pop();
             }
 
-            RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-            RenderSystem.setShaderColor(1f,1f,1f, a /255f);
-            RenderSystem.enableBlend();
-            RenderSystem.depthFunc(GL11.GL_ALWAYS);
+            if (!chestPositions.isEmpty()) {
+                var buffer = builder.end();
 
-            if(!chestPositions.isEmpty() && enabled) BufferRenderer.drawWithGlobalProgram(builder.end());
+                if (enabled) {
+                    RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+                    RenderSystem.setShaderColor(1f, 1f, 1f, a / 255f);
+                    RenderSystem.enableBlend();
+                    RenderSystem.depthFunc(GL11.GL_ALWAYS);
 
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.depthFunc(GL11.GL_LEQUAL);
-            RenderSystem.disableBlend();
+                    BufferRenderer.drawWithGlobalProgram(buffer);
+
+                    RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+                    RenderSystem.depthFunc(GL11.GL_LEQUAL);
+                    RenderSystem.disableBlend();
+                }
+                buffer.close();
+            }
+
         });
 
     }
