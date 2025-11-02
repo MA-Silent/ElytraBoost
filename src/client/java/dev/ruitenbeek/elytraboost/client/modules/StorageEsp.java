@@ -1,13 +1,16 @@
 package dev.ruitenbeek.elytraboost.client.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.ruitenbeek.elytraboost.client.Utils.BooleanHolder;
 import dev.ruitenbeek.elytraboost.client.modModule;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.RotationAxis;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static dev.ruitenbeek.elytraboost.client.Utils.Gui.buttonWidgetMap;
 import static dev.ruitenbeek.elytraboost.client.Utils.canUpdate.canUpdate;
 import static dev.ruitenbeek.elytraboost.client.ElytraboostClient.mc;
 
@@ -25,7 +29,7 @@ public class StorageEsp implements modModule {
 
     private final ArrayList<BlockPos> chestPositions = new ArrayList<>();
     private final List<BlockEntityType<?>> allowedBlocks = List.of(BlockEntityType.CHEST, BlockEntityType.SHULKER_BOX);
-    public static boolean enabled = true;
+    public static BooleanHolder enabled = new BooleanHolder(true);
 
     private StorageEsp(){
         ClientChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
@@ -105,7 +109,7 @@ public class StorageEsp implements modModule {
             if (!chestPositions.isEmpty()) {
                 var buffer = builder.end();
 
-                if (enabled) {
+                if (enabled.value) {
                     RenderSystem.setShader(GameRenderer::getPositionColorProgram);
                     RenderSystem.setShaderColor(1f, 1f, 1f, a / 255f);
                     RenderSystem.enableBlend();
@@ -122,6 +126,11 @@ public class StorageEsp implements modModule {
 
         });
 
+        ButtonWidget checkBox = ButtonWidget.builder(Text.of("StorageEsp"), (btn) -> {
+            enabled.value = !enabled.value;
+        }).size(100,20).build();
+
+        buttonWidgetMap.put(checkBox, enabled);
     }
 
     private ArrayList<BlockPos> getChestPositionsInChunk(ChunkPos chunkPos) {

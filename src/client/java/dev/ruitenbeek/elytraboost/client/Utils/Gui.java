@@ -4,10 +4,14 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static dev.ruitenbeek.elytraboost.client.modules.OpenGui.keyBind;
-import static dev.ruitenbeek.elytraboost.client.modules.StorageEsp.enabled;
 
 public class Gui extends Screen {
+
+    public static Map<ButtonWidget, BooleanHolder> buttonWidgetMap =  new HashMap<>();
 
     public Gui(Text title) {
         super(title);
@@ -15,15 +19,12 @@ public class Gui extends Screen {
 
     @Override
     protected void init() {
-        ButtonWidget checkBox = ButtonWidget.builder(Text.of("StorageEsp"), (btn) -> {
-            assert client != null;
-            enabled = !enabled;
-        }).build();
-
-        checkBox.setDimensions(100,20);
-        checkBox.setAlpha(enabled ? 255f : 126f);
-
-        this.addDrawableChild(checkBox);
+        if(!buttonWidgetMap.isEmpty()) {
+            for (Map.Entry<ButtonWidget, BooleanHolder> entry : buttonWidgetMap.entrySet()) {
+               entry.getKey().setAlpha(entry.getValue().value ? 255f : 126f);
+               this.addDrawableChild(entry.getKey());
+            }
+        }
     }
 
     @Override
