@@ -49,7 +49,7 @@ public class Render implements modModule {
             final int r = 255;
             final int g = 0;
             final int b = 0;
-            final int a = 230;
+            final int a = 200;
 
             for (BlockPos pos : chestPositions) {
                 pose.push();
@@ -105,7 +105,7 @@ public class Render implements modModule {
             RenderSystem.enableBlend();
             RenderSystem.depthFunc(GL11.GL_ALWAYS);
 
-            BufferRenderer.drawWithGlobalProgram(builder.end());
+            if(!chestPositions.isEmpty()) BufferRenderer.drawWithGlobalProgram(builder.end());
 
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.depthFunc(GL11.GL_LEQUAL);

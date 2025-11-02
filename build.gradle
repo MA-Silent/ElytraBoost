@@ -40,8 +40,11 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation 'org.reflections:reflections:0.10.2'
+    modImplementation include("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+
+
+    modImplementation include('org.reflections:reflections:0.10.2')
+    modImplementation include('org.javassist:javassist:3.28.0-GA')
 }
 
 processResources {
