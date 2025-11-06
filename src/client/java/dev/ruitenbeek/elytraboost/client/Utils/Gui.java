@@ -13,6 +13,9 @@ public class Gui extends Screen {
 
     public static Map<ButtonWidget, BooleanHolder> buttonWidgetMap =  new HashMap<>();
 
+    private int lastPositionX = 0;
+    private int lastPositionY = 0;
+
     public Gui(Text title) {
         super(title);
     }
@@ -21,7 +24,13 @@ public class Gui extends Screen {
     protected void init() {
         if(!buttonWidgetMap.isEmpty()) {
             for (Map.Entry<ButtonWidget, BooleanHolder> entry : buttonWidgetMap.entrySet()) {
+
                entry.getKey().setAlpha(entry.getValue().value ? 255f : 126f);
+               entry.getKey().setPosition(lastPositionX, lastPositionY + entry.getKey().getHeight() + 10);
+
+               lastPositionX = entry.getKey().getX();
+               lastPositionY = entry.getKey().getY();
+
                this.addDrawableChild(entry.getKey());
             }
         }
@@ -44,6 +53,16 @@ public class Gui extends Screen {
         this.clearAndInit();
         return handled;
     }
+
+    @Override
+    public void clearChildren() {
+
+        lastPositionY = 0;
+        lastPositionX = 0;
+
+        super.clearChildren();
+    }
+
 
     @Override
     public boolean shouldPause() {

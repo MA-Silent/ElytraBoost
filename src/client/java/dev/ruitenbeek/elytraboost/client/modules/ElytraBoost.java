@@ -1,18 +1,26 @@
 package dev.ruitenbeek.elytraboost.client.modules;
 
+import dev.ruitenbeek.elytraboost.client.Utils.BooleanHolder;
 import dev.ruitenbeek.elytraboost.client.modModule;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.FireworksComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
+import net.minecraft.item.FireworkRocketItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.TypedActionResult;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static dev.ruitenbeek.elytraboost.client.ElytraboostClient.*;
+import static dev.ruitenbeek.elytraboost.client.Utils.Gui.buttonWidgetMap;
 import static dev.ruitenbeek.elytraboost.client.Utils.canUpdate.canUpdate;
 
 public class ElytraBoost implements modModule {
@@ -27,6 +36,7 @@ public class ElytraBoost implements modModule {
     private static KeyBinding keyBind;
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
     private final int durationInSeconds = 1;
+    private BooleanHolder enabled = new BooleanHolder(true);
 
     private ElytraBoost() {
 
@@ -36,6 +46,17 @@ public class ElytraBoost implements modModule {
                 GLFW.GLFW_KEY_B,
                 "ElytraBoost"
         ));
+
+        UseItemCallback.EVENT.register((playerEntity, world,hand) -> {
+            ItemStack heldItem = playerEntity.getStackInHand(hand);
+            if(enabled.value) {
+                if (heldItem.getItem() instanceof FireworkRocketItem) {
+                    boost();
+                    return TypedActionResult.consume(heldItem);
+                }
+            }
+            return TypedActionResult.pass(heldItem);
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keyBind.wasPressed()) {
@@ -57,7 +78,14 @@ public class ElytraBoost implements modModule {
             }
 
         });
+
+        ButtonWidget checkBox = ButtonWidget.builder(Text.of("Firework use cancel"), (btn) -> {
+            enabled.value = !enabled.value;
+        }).size(100,20).build();
+
+        buttonWidgetMap.put(checkBox, enabled);
     }
+
 
     private void boost() {
         if (!canUpdate()) return;
