@@ -2,6 +2,7 @@ package dev.ruitenbeek.elytraboost.client.modules;
 
 import dev.ruitenbeek.elytraboost.client.Utils.BooleanHolder;
 import dev.ruitenbeek.elytraboost.client.modModule;
+import dev.ruitenbeek.elytraboost.client.widgets.ModuleButton;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -79,9 +80,9 @@ public class ElytraBoost implements modModule {
 
         });
 
-        ButtonWidget checkBox = ButtonWidget.builder(Text.of("Firework use cancel"), (btn) -> {
+        ModuleButton checkBox = new ModuleButton(0,0,100,20,Text.of("ElytraBoost"),(btn)->{
             enabled.value = !enabled.value;
-        }).size(100,20).build();
+        }, enabled);
 
         buttonWidgetMap.put(checkBox, enabled);
     }

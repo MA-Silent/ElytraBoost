@@ -3,6 +3,7 @@ package dev.ruitenbeek.elytraboost.client.modules;
 import com.mojang.blaze3d.systems.RenderSystem;
 import dev.ruitenbeek.elytraboost.client.Utils.BooleanHolder;
 import dev.ruitenbeek.elytraboost.client.modModule;
+import dev.ruitenbeek.elytraboost.client.widgets.ModuleButton;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.block.entity.BlockEntity;
@@ -126,9 +127,9 @@ public class StorageEsp implements modModule {
 
         });
 
-        ButtonWidget checkBox = ButtonWidget.builder(Text.of("StorageEsp"), (btn) -> {
+        ModuleButton checkBox = new ModuleButton(0,0,100,20,Text.of("StorageESP"),(btn)->{
             enabled.value = !enabled.value;
-        }).size(100,20).build();
+        }, enabled);
 
         buttonWidgetMap.put(checkBox, enabled);
     }
